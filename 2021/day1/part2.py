@@ -1,4 +1,4 @@
-with open('2.input') as f:
+with open('input.txt') as f:
     d = f.readlines()
 
 # Convert list of str to int

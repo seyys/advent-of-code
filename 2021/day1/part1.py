@@ -1,4 +1,4 @@
-with open('1.input') as f:
+with open('input.txt') as f:
     d = f.readlines()
 
 n = 0
