@@ -10,28 +10,50 @@ def hex2bin(s:str):
 
 def do_conversion(data):
     data_bin = hex2bin(data)
-    version_sum = 0
-    return parse_packet_data(data_bin, version_sum)
+    total = 0
+    return parse_packet_data(data_bin)
     
-def parse_packet_data(data_bin, version_sum):
+def parse_packet_data(data_bin):
     p = packet(data_bin)
-    version_sum += p.version
     count_bits_read = p.bits_read
     count_subpacket_bits_read = 0
     if p.id != 4:
         if p.length_type_id == 0:
             while count_subpacket_bits_read < p.total_length_in_bits:
-                foo,version_sum = parse_packet_data(data_bin[count_bits_read+count_subpacket_bits_read:],version_sum)
+                foo = parse_packet_data(data_bin[count_bits_read+count_subpacket_bits_read:])
                 p.subpacket.append(foo)
                 count_subpacket_bits_read += p.subpacket[-1].bits_read
                 p.bits_read += p.subpacket[-1].bits_read
         else:
             for i in range(p.number_of_sub_packets):
-                foo,version_sum = parse_packet_data(data_bin[count_bits_read+count_subpacket_bits_read:],version_sum)
+                foo = parse_packet_data(data_bin[count_bits_read+count_subpacket_bits_read:])
                 p.subpacket.append(foo)
                 count_subpacket_bits_read += p.subpacket[-1].bits_read
                 p.bits_read += p.subpacket[-1].bits_read
-    return p, version_sum
+    if p.id == 0:
+        p.value = sum([x.value for x in p.subpacket])
+    elif p.id == 1:
+        p.value = np.prod([x.value for x in p.subpacket])
+    elif p.id == 2:
+        p.value = min([x.value for x in p.subpacket])
+    elif p.id == 3:
+        p.value = max([x.value for x in p.subpacket])
+    elif p.id == 5:
+        if (p.subpacket[0].value > p.subpacket[1].value):
+            p.value = 1
+        else:
+            p.value = 0
+    elif p.id == 6:
+        if (p.subpacket[0].value < p.subpacket[1].value):
+            p.value = 1
+        else:
+            p.value = 0
+    elif p.id == 7:
+        if (p.subpacket[0].value == p.subpacket[1].value):
+            p.value = 1
+        else:
+            p.value = 0
+    return p
 
 class packet:
     def __init__(self,data_bin:str):
@@ -74,15 +96,25 @@ class packet:
 with open('input.txt') as f:
     d = f.readline().strip()
 
-p,versum = do_conversion("D2FE28")
-p,versum = do_conversion("EE00D40C823060")
-p,versum = do_conversion("8A004A801A8002F478")
-p,versum = do_conversion("620080001611562C8802118E34")
-p,versum = do_conversion("C0015000016115A2E0802F182340")
-p,versum = do_conversion("A0016C880162017C3686B18A3D4780")
-p,versum = do_conversion(d)
+p = do_conversion("C200B40A82")
+assert p.value == 3
+p = do_conversion("04005AC33890")
+assert p.value == 54
+p = do_conversion("880086C3E88112")
+assert p.value == 7
+p = do_conversion("CE00C43D881120")
+assert p.value == 9
+p = do_conversion("D8005AC2A8F0")
+assert p.value == 1
+p = do_conversion("F600BC2D8F")
+assert p.value == 0
+p = do_conversion("9C005AC2F8F0")
+assert p.value == 0
+p = do_conversion("9C0141080250320F1802104A08")
+assert p.value == 1
+p = do_conversion(d)
 
-print(versum)
+print(p.value)
 
 """
 --- Day 16: Packet Decoder ---
