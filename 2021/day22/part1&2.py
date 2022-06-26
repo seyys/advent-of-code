@@ -15,33 +15,6 @@ def check_cuboid_intersection(c1,c2):
         return False
     return True
 
-def check_c1_in_c2(c1,c2):
-    if c1[1][0] < c2[1][0]:
-        return False
-    if c1[1][0] > c2[1][1]:
-        return False
-    if c1[1][1] < c2[1][0]:
-        return False
-    if c1[1][1] > c2[1][1]:
-        return False
-    if c1[2][0] < c2[2][0]:
-        return False
-    if c1[2][0] > c2[2][1]:
-        return False
-    if c1[2][1] < c2[2][0]:
-        return False
-    if c1[2][1] > c2[2][1]:
-        return False
-    if c1[3][0] < c2[3][0]:
-        return False
-    if c1[3][0] > c2[3][1]:
-        return False
-    if c1[3][1] < c2[3][0]:
-        return False
-    if c1[3][1] > c2[3][1]:
-        return False
-    return True
-
 def get_cuboid_intersection(c1,c2):
     x = sorted([c1[1][0],c1[1][1],c2[1][0],c2[1][1]])
     y = sorted([c1[2][0],c1[2][1],c2[2][0],c2[2][1]])
@@ -99,7 +72,7 @@ def main():
     for row in instructions:
         all_cuboids = add_cuboid(row, all_cuboids)
 
-    print("total = " + str(int(calculate_volume(all_cuboids))))
+    print(str(int(calculate_volume(all_cuboids))))
 
 if __name__=="__main__":
     main()
