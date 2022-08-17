@@ -21,8 +21,7 @@ for instruction in d:
         a, b = instruction.replace("rect ","").split('x')
         a = int(a)
         b = int(b)
-        display.extend((x,y) for x in range(a) for y in range(b))
-        display = list(set(display)) # remove dupes
+        display.extend((x,y) for x in range(a) for y in range(b) if (x,y) not in display)
     elif "rotate column" in instruction:
         col, increment = instruction.replace("rotate column x=",'').split(" by ")
         col = int(col)
