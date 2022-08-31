@@ -1,7 +1,7 @@
 d = "01111001100111011"
 disk_size = 272
 
-while len(d) < 272:
+while len(d) < disk_size:
     a = d
     b = ''.join(['0' if x == '1' else '1' for x in a[::-1]])
     d = a + '0' + b
