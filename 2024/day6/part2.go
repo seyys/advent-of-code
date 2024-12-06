@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"sync"
+	"sync/atomic"
 )
 
 func Part2() {
@@ -53,12 +54,8 @@ func Part2() {
 	}
 
 	// Count number of positions obstructions can be placed to make guard loop
-	count := 0
-	var mu sync.Mutex
+	var count uint32
 	var wg sync.WaitGroup
-
-	// Channel to collect results from goroutines
-	results := make(chan int, len(grid)*len(grid[0])) // buffer size to avoid blocking
 
 	for _, obstaclePosition := range obstaclePositions {
 		r := obstaclePosition[0]
@@ -79,21 +76,12 @@ func Part2() {
 			newGrid[r][c] = '#'
 
 			if isLoop(startR, startC, newGrid) {
-				mu.Lock()
-				results <- 1
-				mu.Unlock()
-			} else {
-				results <- 0
+				atomic.AddUint32(&count, 1) // Atomically increment the counter
 			}
 		}(r, c) // Pass current r and c to the goroutine
 	}
 
 	wg.Wait()
-	close(results)
-
-	for result := range results {
-		count += result
-	}
 
 	fmt.Println(count)
 }
