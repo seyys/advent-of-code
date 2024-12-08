@@ -28,6 +28,9 @@ func Part1() {
 }
 
 func isValidLine(runningTotal int, total int, values []int) bool {
+	if runningTotal > total {
+		return false
+	}
 	if len(values) == 0 {
 		return runningTotal == total
 	}

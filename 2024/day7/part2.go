@@ -29,6 +29,9 @@ func Part2() {
 }
 
 func isValidLineDay7Part2(runningTotal int, total int, values []int) bool {
+	if runningTotal > total {
+		return false
+	}
 	if len(values) == 0 {
 		return runningTotal == total
 	}
