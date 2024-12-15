@@ -3,12 +3,10 @@ package day15
 import (
 	"advent-of-code-2024/helpers"
 	"bufio"
-	"fmt"
-	"os"
 )
 
 func Part2() {
-	file := helpers.OpenFile("./day15/test3.txt")
+	file := helpers.OpenFile("./day15/input.txt")
 
 	entities = make(map[Coords]Entity)
 	var instructions string
@@ -27,7 +25,8 @@ func Part2() {
 				entities[Coords{2 * c, r}] = Entity{EntityType(WALL)}
 				entities[Coords{2*c + 1, r}] = Entity{EntityType(WALL)}
 			case 'O':
-				entities[Coords{2 * c, r}] = Entity{EntityType(BOX)}
+				entities[Coords{2 * c, r}] = Entity{EntityType(BOX_LEFT)}
+				entities[Coords{2*c + 1, r}] = Entity{EntityType(BOX_RIGHT)}
 			case '@':
 				robot = Coords{2 * c, r}
 			}
@@ -36,95 +35,73 @@ func Part2() {
 
 	scanner.Scan()
 	instructions = scanner.Text()
-	printGrid()
+	// printGrid()
 
-	scanner = bufio.NewScanner(os.Stdin)
+	// scanner = bufio.NewScanner(os.Stdin)
 	for _, instruction := range instructions {
-		if instruction == '>' || instruction == '<' {
-			processCommandHorizontal(instruction)
-		} else {
-			processCommandVertical(instruction)
-		}
-		printGrid()
-		scanner.Scan()
+		// scanner.Scan()
+		processCommandPart2(instruction)
+		// fmt.Println(string(instruction))
+		// printGrid()
 	}
 
 	printGrid()
 	println(checkGpsScore())
 }
 
-func processCommandVertical(instruction rune) {
+func processCommandPart2(instruction rune) {
+	entitiesToMoveMap := make(map[Coords]struct{})
 	var entitiesToMove []Coords
-	coordsToCheck := make(map[Coords]struct{})
-	coordsToCheck[robot] = struct{}{}
-	coordsToCheck[robot.Add(directionMap['<'])] = struct{}{}
+	coordsToCheck := []Coords{robot}
 	direction := directionMap[instruction]
 
 	shouldBreak := false
 	for !shouldBreak {
-		var oldCoords []Coords
-		for coords := range coordsToCheck {
-			coordsToCheck[coords.Add(direction)] = struct{}{}
-			oldCoords = append(oldCoords, coords)
+		for i, coords := range coordsToCheck {
+			coordsToCheck[i] = coords.Add(direction)
 		}
-		for _, coords := range oldCoords {
-			delete(coordsToCheck, coords)
-		}
-		fmt.Println(coordsToCheck)
+		// fmt.Println(coordsToCheck)
 
-		for coords := range coordsToCheck {
-			if shouldBreak {
-				break
-			}
+		var newCoordsToCheck []Coords
+		allEmpty := true
+		for _, coords := range coordsToCheck {
 			entity, exists := entities[coords]
 			if !exists {
-				robot = robot.Add(direction)
-				for i := len(entitiesToMove) - 1; i >= 0; i-- {
-					entity := entities[entitiesToMove[i]]
-					delete(entities, entitiesToMove[i])
-					entities[entitiesToMove[i].Add(direction)] = entity
-				}
-				shouldBreak = true
-				break
+				continue
 			}
+			allEmpty = false
 			switch entity.entityType {
 			case EntityType(WALL):
 				shouldBreak = true
-			case EntityType(BOX):
-				entitiesToMove = append(entitiesToMove, coords)
-				coordsToCheck[coords.Add(directionMap['<'])] = struct{}{}
-				coordsToCheck[coords.Add(directionMap['>'])] = struct{}{}
+			case EntityType(BOX_LEFT):
+				if _, exists := entitiesToMoveMap[coords]; !exists {
+					entitiesToMove = append(entitiesToMove, coords)
+					entitiesToMove = append(entitiesToMove, coords.Add(directionMap['>']))
+					entitiesToMoveMap[coords] = struct{}{}
+					entitiesToMoveMap[coords.Add(directionMap['>'])] = struct{}{}
+					newCoordsToCheck = append(newCoordsToCheck, coords)
+					newCoordsToCheck = append(newCoordsToCheck, coords.Add(directionMap['>']))
+				}
+			case EntityType(BOX_RIGHT):
+				if _, exists := entitiesToMoveMap[coords]; !exists {
+					entitiesToMove = append(entitiesToMove, coords)
+					entitiesToMove = append(entitiesToMove, coords.Add(directionMap['<']))
+					entitiesToMoveMap[coords] = struct{}{}
+					entitiesToMoveMap[coords.Add(directionMap['<'])] = struct{}{}
+					newCoordsToCheck = append(newCoordsToCheck, coords)
+					newCoordsToCheck = append(newCoordsToCheck, coords.Add(directionMap['<']))
+				}
 			}
 		}
-	}
-}
-
-func processCommandHorizontal(instruction rune) {
-	var entitiesToMove []Coords
-	direction := directionMap[instruction]
-	coordsToCheck := robot.Add(direction)
-	if direction == directionMap['<'] {
-		coordsToCheck = coordsToCheck.Add(direction)
-	}
-
-	shouldBreak := false
-	for !shouldBreak {
-		entity, exists := entities[coordsToCheck]
-		if !exists {
+		coordsToCheck = newCoordsToCheck
+		if allEmpty {
 			robot = robot.Add(direction)
 			for i := len(entitiesToMove) - 1; i >= 0; i-- {
 				entity := entities[entitiesToMove[i]]
-				delete(entities, entitiesToMove[i])
 				entities[entitiesToMove[i].Add(direction)] = entity
+				delete(entities, entitiesToMove[i])
 			}
-			break
-		}
-		switch entity.entityType {
-		case EntityType(WALL):
 			shouldBreak = true
-		case EntityType(BOX):
-			entitiesToMove = append(entitiesToMove, coordsToCheck)
 		}
-		coordsToCheck = coordsToCheck.Add(direction).Add(direction)
 	}
 }

@@ -10,6 +10,8 @@ type EntityType int
 const (
 	WALL EntityType = iota
 	BOX
+	BOX_LEFT
+	BOX_RIGHT
 )
 
 type Entity struct {
@@ -102,7 +104,7 @@ func checkGpsScore() int {
 	score := 0
 
 	for coords, entity := range entities {
-		if entity.entityType == EntityType(WALL) {
+		if entity.entityType == EntityType(WALL) || entity.entityType == EntityType(BOX_RIGHT) {
 			continue
 		}
 		score += coords.x + coords.y*100
@@ -112,7 +114,9 @@ func checkGpsScore() int {
 }
 
 func printGrid() {
+	println(" 01234567890123456789")
 	for r := 0; r < 10; r++ {
+		print(r)
 		for c := 0; c < 20; c++ {
 			entity, exists := entities[Coords{c, r}]
 			if !exists {
@@ -129,6 +133,10 @@ func printGrid() {
 				print("#")
 			case EntityType(BOX):
 				print("O")
+			case EntityType(BOX_LEFT):
+				print("[")
+			case EntityType(BOX_RIGHT):
+				print("]")
 			}
 		}
 		println()
