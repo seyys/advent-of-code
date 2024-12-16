@@ -33,6 +33,20 @@ func (h *MinHeap) Push(x interface{}) {
 		h.indexMap = make(map[Coords]int)
 	}
 	h.indexMap[node.coords] = len(h.nodes) - 1
+	h.heapifyUp(len(h.nodes) - 1)
+}
+
+// Helper function to maintain heap property when a node is added
+func (h *MinHeap) heapifyUp(index int) {
+	for index > 0 {
+		parent := (index - 1) / 2
+		if h.Less(index, parent) {
+			h.Swap(index, parent)
+			index = parent
+		} else {
+			break
+		}
+	}
 }
 
 func (h *MinHeap) Pop() interface{} {
@@ -41,7 +55,32 @@ func (h *MinHeap) Pop() interface{} {
 	h.nodes = h.nodes[:n-1]
 
 	delete(h.indexMap, node.coords)
+	// Heapify down from the root to restore the heap property
+	h.heapifyDown(0)
+
 	return node
+}
+
+// Helper function to maintain heap property when a node is removed
+func (h *MinHeap) heapifyDown(index int) {
+	n := len(h.nodes)
+	for {
+		left := 2*index + 1
+		right := 2*index + 2
+		smallest := index
+
+		if left < n && h.Less(left, smallest) {
+			smallest = left
+		}
+		if right < n && h.Less(right, smallest) {
+			smallest = right
+		}
+		if smallest == index {
+			break
+		}
+		h.Swap(index, smallest)
+		index = smallest
+	}
 }
 
 // O(1) function to get the node at given coordinates

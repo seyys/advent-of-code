@@ -56,6 +56,7 @@ func Part1() {
 
 	for openList.Len() > 0 {
 		q := heap.Pop(openList).(Node)
+		// printPath(start, end, q, walls)
 		if q.coords == end {
 			println(q.g)
 			break
@@ -133,14 +134,14 @@ func printPath(start, end Coords, node Node, walls map[Coords]struct{}) {
 	for r := 0; r < 17; r++ {
 		for c := 0; c < 17; c++ {
 			coords := Coords{c, r}
-			if coords == start {
+			if direction, exists := path[coords]; exists {
+				print(directionMap[direction])
+			} else if coords == start {
 				print("S")
 			} else if coords == end {
 				print("E")
 			} else if _, exists := walls[coords]; exists {
 				print("#")
-			} else if direction, exists := path[coords]; exists {
-				print(directionMap[direction])
 			} else {
 				print(".")
 			}
