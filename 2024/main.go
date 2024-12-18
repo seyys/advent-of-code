@@ -1,7 +1,7 @@
 package main
 
-import "advent-of-code-2024/day16"
+import "advent-of-code-2024/day18"
 
 func main() {
-	day16.Part2()
+	day18.Part1()
 }
