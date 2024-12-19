@@ -18,7 +18,7 @@ func Part2() {
 	scanner.Scan()
 	line := scanner.Text()
 	for _, pattern := range strings.Split(line, ", ") {
-		firstChar := []byte(pattern)[0]
+		firstChar := pattern[0]
 		patterns[firstChar] = append(patterns[firstChar], pattern)
 	}
 
@@ -50,7 +50,7 @@ func isValidPart2(remaining string) int {
 		return numCombinations.(int)
 	}
 
-	nextChar := []byte(remaining)[0]
+	nextChar := remaining[0]
 	result := 0
 	for _, pattern := range patterns[nextChar] {
 		if len(remaining) < len(pattern) {
